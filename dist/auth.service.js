@@ -6,7 +6,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs/Observable";
-var AuthService = (function () {
+import { saveToStorage, loadFromStorage, deleteFromStorage } from "./storage.utils";
+var AuthService = /** @class */ (function () {
     function AuthService() {
     }
     AuthService.prototype.login = function (provider) {
@@ -19,13 +20,13 @@ var AuthService = (function () {
                     }
                     if (!_this.gauth.isSignedIn.get()) {
                         _this.gauth.signIn().then(function () {
-                            localStorage.setItem('_login_provider', 'google');
+                            saveToStorage('_login_provider', 'google');
                             observer.next(_this._fetchGoogleUserDetails());
                             observer.complete();
                         });
                     }
                     else {
-                        localStorage.setItem('_login_provider', 'google');
+                        saveToStorage('_login_provider', 'google');
                         observer.next(_this._fetchGoogleUserDetails());
                         observer.complete();
                     }
@@ -46,7 +47,7 @@ var AuthService = (function () {
                                         image: res.picture.data.url,
                                         token: response.authResponse.accessToken
                                     };
-                                    localStorage.setItem('_login_provider', 'facebook');
+                                    saveToStorage('_login_provider', 'facebook');
                                     observer.next(userDetails);
                                     observer.complete();
                                 }
@@ -68,7 +69,7 @@ var AuthService = (function () {
                                                 image: res.picture.data.url,
                                                 token: response.authResponse.accessToken
                                             };
-                                            localStorage.setItem('_login_provider', 'facebook');
+                                            saveToStorage('_login_provider', 'facebook');
                                             observer.next(userDetails);
                                             observer.complete();
                                         }
@@ -82,7 +83,7 @@ var AuthService = (function () {
                     IN.User.authorize(function () {
                         IN.API.Raw("/people/~:(id,first-name,last-name,email-address,picture-url)").result(function (res) {
                             var userDetails = { name: res.firstName + " " + res.lastName, email: res.emailAddress, uid: res.id, provider: "linkedIN", image: res.pictureUrl };
-                            localStorage.setItem('_login_provider', 'linkedin');
+                            saveToStorage('_login_provider', 'linkedin');
                             observer.next(userDetails);
                             observer.complete();
                         });
@@ -92,7 +93,7 @@ var AuthService = (function () {
         });
     };
     AuthService.prototype.logout = function () {
-        var provider = localStorage.getItem("_login_provider");
+        var provider = loadFromStorage("_login_provider");
         return Observable.create(function (observer) {
             switch (provider) {
                 case "google":
@@ -106,21 +107,21 @@ var AuthService = (function () {
                     gSignout.src = "https://accounts.google.com/Logout";
                     gSignout.type = "text/html";
                     gSignout.id = "gSignout";
-                    localStorage.removeItem('_login_provider');
+                    deleteFromStorage('_login_provider');
                     observer.next(true);
                     observer.complete();
                     ref.parentNode.insertBefore(gSignout, ref);
                     break;
                 case "facebook":
                     FB.logout(function (res) {
-                        localStorage.removeItem('_login_provider');
+                        deleteFromStorage('_login_provider');
                         observer.next(true);
                         observer.complete();
                     });
                     break;
                 case "linkedin":
                     IN.User.logout(function () {
-                        localStorage.removeItem('_login_provider');
+                        deleteFromStorage('_login_provider');
                         observer.next(true);
                         observer.complete();
                     }, {});

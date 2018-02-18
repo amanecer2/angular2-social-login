@@ -4,13 +4,71 @@
 	(factory((global.ng = global.ng || {}, global.ng.angular2SocialLogin = global.ng.angular2SocialLogin || {}),global.ng.core,global.Rx));
 }(this, (function (exports,_angular_core,rxjs_Observable) { 'use strict';
 
+function setCookie(cname, cvalue, exdays) {
+    if (exdays === void 0) { exdays = 1; }
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = 'expires=' + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return '';
+}
+function setLocalStorage(cname, cvalue) {
+    localStorage.setItem(cname, cvalue);
+}
+function getLocalStorage(cname) {
+    return localStorage.getItem(cname);
+}
+function deleteLocalStorage(cname) {
+    localStorage.removeItem(cname);
+}
+function deleteCookie(cname) {
+    setCookie(cname, '', 0);
+}
+function isLocalStorageAvailable() {
+    var test = 'test';
+    try {
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+    }
+    catch (e) {
+        return false;
+    }
+}
+var getSavingMethod = function () {
+    return isLocalStorageAvailable() ? setLocalStorage : setCookie;
+};
+var getRetrieveMethod = function () {
+    return isLocalStorageAvailable() ? getLocalStorage : getCookie;
+};
+var getDeleteMethod = function () {
+    return isLocalStorageAvailable() ? deleteLocalStorage : deleteCookie;
+};
+var saveToStorage = getSavingMethod();
+var loadFromStorage = getRetrieveMethod();
+var deleteFromStorage = getDeleteMethod();
+
 var __decorate$1 = (undefined && undefined.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var AuthService = (function () {
+var AuthService = /** @class */ (function () {
     function AuthService() {
     }
     AuthService.prototype.login = function (provider) {
@@ -23,13 +81,13 @@ var AuthService = (function () {
                     }
                     if (!_this.gauth.isSignedIn.get()) {
                         _this.gauth.signIn().then(function () {
-                            localStorage.setItem('_login_provider', 'google');
+                            saveToStorage('_login_provider', 'google');
                             observer.next(_this._fetchGoogleUserDetails());
                             observer.complete();
                         });
                     }
                     else {
-                        localStorage.setItem('_login_provider', 'google');
+                        saveToStorage('_login_provider', 'google');
                         observer.next(_this._fetchGoogleUserDetails());
                         observer.complete();
                     }
@@ -50,7 +108,7 @@ var AuthService = (function () {
                                         image: res.picture.data.url,
                                         token: response.authResponse.accessToken
                                     };
-                                    localStorage.setItem('_login_provider', 'facebook');
+                                    saveToStorage('_login_provider', 'facebook');
                                     observer.next(userDetails);
                                     observer.complete();
                                 }
@@ -72,7 +130,7 @@ var AuthService = (function () {
                                                 image: res.picture.data.url,
                                                 token: response.authResponse.accessToken
                                             };
-                                            localStorage.setItem('_login_provider', 'facebook');
+                                            saveToStorage('_login_provider', 'facebook');
                                             observer.next(userDetails);
                                             observer.complete();
                                         }
@@ -86,7 +144,7 @@ var AuthService = (function () {
                     IN.User.authorize(function () {
                         IN.API.Raw("/people/~:(id,first-name,last-name,email-address,picture-url)").result(function (res) {
                             var userDetails = { name: res.firstName + " " + res.lastName, email: res.emailAddress, uid: res.id, provider: "linkedIN", image: res.pictureUrl };
-                            localStorage.setItem('_login_provider', 'linkedin');
+                            saveToStorage('_login_provider', 'linkedin');
                             observer.next(userDetails);
                             observer.complete();
                         });
@@ -96,7 +154,7 @@ var AuthService = (function () {
         });
     };
     AuthService.prototype.logout = function () {
-        var provider = localStorage.getItem("_login_provider");
+        var provider = loadFromStorage("_login_provider");
         return rxjs_Observable.Observable.create(function (observer) {
             switch (provider) {
                 case "google":
@@ -110,21 +168,21 @@ var AuthService = (function () {
                     gSignout.src = "https://accounts.google.com/Logout";
                     gSignout.type = "text/html";
                     gSignout.id = "gSignout";
-                    localStorage.removeItem('_login_provider');
+                    deleteFromStorage('_login_provider');
                     observer.next(true);
                     observer.complete();
                     ref.parentNode.insertBefore(gSignout, ref);
                     break;
                 case "facebook":
                     FB.logout(function (res) {
-                        localStorage.removeItem('_login_provider');
+                        deleteFromStorage('_login_provider');
                         observer.next(true);
                         observer.complete();
                     });
                     break;
                 case "linkedin":
                     IN.User.logout(function () {
-                        localStorage.removeItem('_login_provider');
+                        deleteFromStorage('_login_provider');
                         observer.next(true);
                         observer.complete();
                     }, {});
@@ -159,7 +217,7 @@ var __decorate = (undefined && undefined.__decorate) || function (decorators, ta
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var Angular2SocialLoginModule = (function () {
+var Angular2SocialLoginModule = /** @class */ (function () {
     function Angular2SocialLoginModule() {
     }
     Angular2SocialLoginModule.loadProvidersScripts = function (config) {

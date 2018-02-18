@@ -6,7 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 import { NgModule } from "@angular/core";
 import { AuthService } from "./auth.service";
-var Angular2SocialLoginModule = (function () {
+var Angular2SocialLoginModule = /** @class */ (function () {
     function Angular2SocialLoginModule() {
     }
     Angular2SocialLoginModule.loadProvidersScripts = function (config) {
