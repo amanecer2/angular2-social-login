@@ -1,0 +1,13 @@
+export declare function setCookie(cname: string, cvalue: any, exdays?: number): void;
+export declare function getCookie(cname: string): any;
+export declare function setLocalStorage(cname: string, cvalue: any): void;
+export declare function getLocalStorage(cname: string): any;
+export declare function deleteLocalStorage(cname: string): void;
+export declare function deleteCookie(cname: string): void;
+export declare function isLocalStorageAvailable(): boolean;
+export declare const getSavingMethod: () => typeof setCookie;
+export declare const getRetrieveMethod: () => typeof getLocalStorage;
+export declare const getDeleteMethod: () => typeof deleteLocalStorage;
+export declare const saveToStorage: typeof setCookie;
+export declare const loadFromStorage: typeof getLocalStorage;
+export declare const deleteFromStorage: typeof deleteLocalStorage;
