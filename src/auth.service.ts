@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
-import { saveToStorage, loadFromStorage, deleteFromStorage} from "storage.utils";
+import { saveToStorage, loadFromStorage, deleteFromStorage} from "./storage.utils";
 
 declare let gapi: any;
 declare let IN: any;
