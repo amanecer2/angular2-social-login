@@ -2,7 +2,7 @@ export function setCookie(cname: string, cvalue: any, exdays = 1): void {
     const d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     const expires = 'expires=' + d.toUTCString();
-    document.cookie = `${cname}=${cvalue};${expires};path=/`;
+    document.cookie = `${cname}=${JSON.stringify(cvalue)};${expires};path=/`;
 }
 
 export function getCookie(cname: string): any {
@@ -15,7 +15,7 @@ export function getCookie(cname: string): any {
             c = c.substring(1);
         }
         if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
+            return JSON.parse(c.substring(name.length, c.length));
         }
     }
     return '';
